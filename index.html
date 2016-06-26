@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>filereader test</title>
+	<script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="https://use.typekit.net/zog0fdt.js"></script>
+	<script>try{Typekit.load({ async: true });}catch(e){}</script>
+	<style type="text/css" media="screen">
+		body{background: #212121;color:#fff;margin:0;padding: 0;}
+		h1{font-family: 'bungee',sans-serif;text-align:center;font-weight: 400;font-size: 3em;}
+		#full_screen{position:absolute;right:2em;top: 2em;border: 1px solid #5f5959; background: #212121; color: #dfe1e2; padding: 0.5em 1em;border-radius: 3px;}
+		#soctextarea{width: 400px;background: rgb(49, 49, 49) none repeat scroll 0% 0%;margin: 48px auto;padding:1em;}
+		#soctextarea p{padding:0.2em;text-align: left;}
+		#soctextarea p>span{display:inline-block;background:#cdd7e2;padding:0.25em;border:1px solid #cdd7e2;border-radius:5px;color:#000;min-width:20px;font-size:15px;}
+		#soctextarea p.me>span{background:#78cdf8;border-color:#78cdf8;}
+		#sendtext{height: 39px; margin: 0px 17px 48px 0px; width: 315px; font-size: 1.1em;}
+		#sen_btn{font-size:1.1em;height:44px;width:97px;background:rgb(255, 255, 255) none repeat scroll 0% 0%;border:1px solid rgb(168, 168, 168);color:rgb(33, 33, 33);}
+	</style>
+</head>
+<body >
+<h1 style="">PHP WebSocket test </h1>
+<button type="button" id="full_screen"> 全屏 </button>
+
+<div id="socket" style="text-align:center">
+<small id="smallt"></small>
+<div id="soctextarea" style="width:400px;background: #313131;">
+
+</div>
+<input type="text" id="sendtext"/><input type="button" id="sen_btn" name="" value="发送"/>
+</div>
+<script>
+
+console.info(typeof document.hidden);
+document.addEventListener('visibilitychange',function(){
+	if(document.hidden){
+		$('head>title').text('yo hooooooooooooooooooooooooo~~~~~~~~~~~~');
+	}else{
+		$('head>title').text('I`m back!');
+	}
+},false);
+
+
+//webSocket 测试
+var socket,socketId;
+function connect(){
+	try{
+		socket=new WebSocket('ws://127.0.0.1:8080');
+		socket.onopen=function(){
+			console.log('已建立链接');
+		}
+		socket.onmessage=function(msg){
+			console.info('接收到的信息：',msg.data);
+			if(msg.data==''){
+				return false;
+			}
+			var data=JSON.parse(msg.data);
+			if(data.type=='num_order'){
+				socketId=data.num
+			}else if(data.type=='message'){
+				var str='';
+				if(data.num==socketId){
+					str='<p class="me" style="text-align:right"><span>'+data.msg+'</span>：ME</p>';
+				}else{
+					str='<p>'+(data.num+1)+'号连接：<span>'+data.msg+'</span></p>';
+				}
+
+				$('#soctextarea').append(str);
+			}
+
+		}
+	}catch(execption){
+
+	}
+}
+window.onload = function() {
+    connect();
+}
+
+
+var docElm=document.documentElement;
+$(function(){
+	$('#full_screen').click(function(event) {
+		if(!document.webkitIsFullScreen && docElm.webkitRequestFullScreen){
+			docElm.webkitRequestFullScreen();
+			$(this).text('退出全屏');
+		}else{
+			document.webkitCancelFullScreen();
+			$(this).text('全屏');
+		}
+	});
+
+	$('#sen_btn').click(function(event) {
+		var tet=$('#sendtext').val();
+		if(tet!='')
+			socket.send(tet);
+	});
+
+})
+</script>
+</body>
+</html>
